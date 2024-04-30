@@ -148,63 +148,100 @@ class EditorConfigurationViewController: UITableViewController {
 }
 extension EditorConfigurationViewController: EditorViewControllerDelegate {
     
-    /// 完成编辑
-    /// - Parameters:
-    ///   - editorViewController: 对应的 EditorViewController
-    ///   - result: 编辑后的数据
     func editorViewController(
         _ editorViewController: EditorViewController,
         didFinish asset: EditorAsset
     ) {
-        #if OCEXAMPLE
-        if asset.contentType == .image {
-            let pickerResultVC = PickerResultViewController.init()
-            var pickerConfig = PickerConfiguration.init()
-            pickerConfig.editor = config
-            pickerResultVC.config = pickerConfig
-            switch asset.type {
-            case .image(let image):
-                let localImageAsset = LocalImageAsset.init(image: image)
-                let photoAsset = PhotoAsset.init(localImageAsset: localImageAsset)
-                photoAsset.editedResult = asset.result
-                pickerResultVC.selectedAssets = [photoAsset]
-            #if canImport(Kingfisher)
-            case .networkImage(let url):
-                let photoAsset = PhotoAsset.init(networkImageAsset: .init(thumbnailURL: url, originalURL: url))
-                photoAsset.editedResult = asset.result
-                pickerResultVC.selectedAssets = [photoAsset]
-            #endif
-            default:
-                break
+        switch asset.type {
+        case .image(_):
+            if let url = asset.result?.url, let data = try? Data(contentsOf: url) {
+                let name = UUID().uuidString + ".png"
+                try? data.write(to: URL(fileURLWithPath: FileManager.documentPath + "/\(name)"))
             }
-            self.navigationController?.pushViewController(pickerResultVC, animated: true)
-        }else {
+        case let .networkImage(url):
+            print(url)
+        case let .imageData(data):
+            print(data)
+        case let .video(url):
             let pickerResultVC = PickerResultViewController.init()
             var pickerConfig = PickerConfiguration.init()
             pickerConfig.editor = config
             pickerResultVC.config = pickerConfig
             
-            switch asset.type {
-            case .video(let url):
-                let photoAsset = PhotoAsset.init(localVideoAsset: .init(videoURL: url))
-                photoAsset.editedResult = asset.result
-                pickerResultVC.selectedAssets = [photoAsset]
-            case .networkVideo(let url):
-                let photoAsset = PhotoAsset(
-                    networkVideoAsset: .init(
-                        videoURL: url
-                    )
-                )
-                photoAsset.editedResult = asset.result
-                pickerResultVC.selectedAssets = [photoAsset]
-            default:
-                break
+            let photoAsset = PhotoAsset.init(localVideoAsset: .init(videoURL: url))
+            photoAsset.editedResult = asset.result
+            if let url = asset.result?.url, let data = try? Data(contentsOf: url) {
+                let name = UUID().uuidString + ".mp4"
+                try? data.write(to: URL(fileURLWithPath: FileManager.documentPath + "/\(name)"))
             }
+            pickerResultVC.selectedAssets = [photoAsset]
             self.navigationController?.pushViewController(pickerResultVC, animated: true)
+        case let .videoAsset(asset):
+            print(asset)
+        case let .networkVideo(url):
+            print(url)
+        case let .photoAsset(asset):
+            print(asset)
         }
-        #endif
     }
     
+//    /// 完成编辑
+//    /// - Parameters:
+//    ///   - editorViewController: 对应的 EditorViewController
+//    ///   - result: 编辑后的数据
+//    func editorViewController(
+//        _ editorViewController: EditorViewController,
+//        didFinish asset: EditorAsset
+//    ) {
+//        #if OCEXAMPLE
+//        if asset.contentType == .image {
+//            let pickerResultVC = PickerResultViewController.init()
+//            var pickerConfig = PickerConfiguration.init()
+//            pickerConfig.editor = config
+//            pickerResultVC.config = pickerConfig
+//            switch asset.type {
+//            case .image(let image):
+//                let localImageAsset = LocalImageAsset.init(image: image)
+//                let photoAsset = PhotoAsset.init(localImageAsset: localImageAsset)
+//                photoAsset.editedResult = asset.result
+//                pickerResultVC.selectedAssets = [photoAsset]
+//            #if canImport(Kingfisher)
+//            case .networkImage(let url):
+//                let photoAsset = PhotoAsset.init(networkImageAsset: .init(thumbnailURL: url, originalURL: url))
+//                photoAsset.editedResult = asset.result
+//                pickerResultVC.selectedAssets = [photoAsset]
+//            #endif
+//            default:
+//                break
+//            }
+//            self.navigationController?.pushViewController(pickerResultVC, animated: true)
+//        }else {
+//            let pickerResultVC = PickerResultViewController.init()
+//            var pickerConfig = PickerConfiguration.init()
+//            pickerConfig.editor = config
+//            pickerResultVC.config = pickerConfig
+//            
+//            switch asset.type {
+//            case .video(let url):
+//                let photoAsset = PhotoAsset.init(localVideoAsset: .init(videoURL: url))
+//                photoAsset.editedResult = asset.result
+//                pickerResultVC.selectedAssets = [photoAsset]
+//            case .networkVideo(let url):
+//                let photoAsset = PhotoAsset(
+//                    networkVideoAsset: .init(
+//                        videoURL: url
+//                    )
+//                )
+//                photoAsset.editedResult = asset.result
+//                pickerResultVC.selectedAssets = [photoAsset]
+//            default:
+//                break
+//            }
+//            self.navigationController?.pushViewController(pickerResultVC, animated: true)
+//        }
+//        #endif
+//    }
+//    
     
     /// 取消编辑
     /// - Parameter photoEditorViewController: 对应的 PhotoEditorViewController
