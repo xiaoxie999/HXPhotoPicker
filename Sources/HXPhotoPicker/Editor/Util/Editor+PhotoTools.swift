@@ -58,6 +58,7 @@ extension PhotoTools {
             )
             chartletList.append(chartlet)
         }
+        print(chartletList.map({ $0.url }))
         return chartletList
     }
     #endif

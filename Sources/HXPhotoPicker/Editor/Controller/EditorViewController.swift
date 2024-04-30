@@ -108,6 +108,7 @@ open class EditorViewController: HXBaseViewController {
         if config.isFixedCropSizeState && config.isIgnoreCropTimeWhenFixedCropSizeState {
             cropTime.maximumTime = 0
         }
+        /// 视频控制
         videoControlView = EditorVideoControlView(config: cropTime)
         videoControlView.delegate = self
         videoControlView.alpha = 0
@@ -209,6 +210,7 @@ open class EditorViewController: HXBaseViewController {
         volumeView.hasMusic = false
         volumeView.delegate = self
         
+        /// 编辑多按钮toolView
         toolsView = EditorToolsView(config: config.toolsView, contentType: selectedAsset.type.contentType)
         toolsView.delegate = self
         

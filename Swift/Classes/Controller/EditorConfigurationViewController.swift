@@ -359,6 +359,7 @@ extension EditorConfigurationViewController: EditorViewControllerDelegate {
                 "hx_sticker_yuanqishaonv",
                 "hx_sticker_zaizaijia"
             ]
+            print(imageNameds.map({ Bundle.main.path(forResource: $0, ofType: "png") }))
             var list: [EditorChartlet] = []
             for imageNamed in imageNameds {
                 let chartlet = EditorChartlet(
@@ -402,6 +403,7 @@ extension EditorConfigurationViewController: EditorViewControllerDelegate {
         )
         gifs.append(.init(url: URL(string: "http://pic.qqtn.com/up/2017-5/2017053118074857711.gif")))
         gifs.append(.init(url: URL(string: "https://pic.diydoutu.com/bq/1493.gif")))
+        print(gifs.map({ $0.url }))
         return gifs
     }
 }
