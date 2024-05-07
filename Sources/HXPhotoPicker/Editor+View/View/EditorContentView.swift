@@ -374,12 +374,12 @@ class EditorContentView: UIView {
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.isHidden = true
-        addSubview(imageView)
+        //addSubview(imageView)
         
         mosaicView = EditorMosaicView()
         mosaicView.delegate = self
         mosaicView.isHidden = true
-        addSubview(mosaicView)
+        //addSubview(mosaicView)
         
         videoView = EditorVideoPlayerView()
         videoView.size = UIDevice.screenSize
@@ -397,11 +397,14 @@ class EditorContentView: UIView {
         
         drawView = EditorDrawView()
         drawView.delegate = self
-        addSubview(drawView)
+        //addSubview(drawView)
         
         stickerView = EditorStickersView()
         stickerView.delegate = self
         addSubview(stickerView)
+        
+        layer.borderColor = UIColor.orange.cgColor
+        layer.borderWidth = 2
     }
     
     required init?(coder: NSCoder) {

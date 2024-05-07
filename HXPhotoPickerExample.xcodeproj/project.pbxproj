@@ -3057,7 +3057,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 36YN45CVLK;
+				DEVELOPMENT_TEAM = D47FY52544;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -3095,7 +3095,7 @@
 					"-Wl",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS -Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = com.silence.example26;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vito.Cabbage;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -3122,7 +3122,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 36YN45CVLK;
+				DEVELOPMENT_TEAM = D47FY52544;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -3158,7 +3158,7 @@
 					"-Wl",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS -Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = com.silence.example26;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vito.Cabbage;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

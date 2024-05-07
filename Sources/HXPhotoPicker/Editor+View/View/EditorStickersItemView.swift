@@ -41,6 +41,10 @@ class EditorStickersItemView: EditorStickersItemBaseView {
     var scale: CGFloat
     var touching: Bool = false
     
+    deinit {
+        print("EditorStickersItemView delloc: \(self)")
+    }
+    
     override var isSelected: Bool {
         willSet {
             if !item.isAudio {
@@ -124,6 +128,11 @@ class EditorStickersItemView: EditorStickersItemBaseView {
         deleteBtn.center = .init(x: externalBorder.frame.minX, y: externalBorder.frame.minY)
         scaleBtn.center = .init(x: externalBorder.frame.width, y: externalBorder.frame.height)
         initGestures()
+        
+        
+        
+        layer.borderColor = UIColor.green.cgColor
+        layer.borderWidth = 2
     }
     
     private func initViews() {
@@ -224,14 +233,14 @@ class EditorStickersItemView: EditorStickersItemBaseView {
                     pinchScale: initialScale * r / scaleR,
                     rotation: initialRadian + arg - scaleA,
                     isPinch: true,
-                    isWindow: true
+                    isWindow: false
                 )
             }else {
                 update(
                     pinchScale: initialScale,
                     rotation: initialRadian + arg - scaleA,
                     isPinch: true,
-                    isWindow: true
+                    isWindow: false
                 )
             }
         case .ended, .cancelled, .failed:
@@ -268,7 +277,7 @@ class EditorStickersItemView: EditorStickersItemBaseView {
             isSelected = false
             return
         }
-        if firstTouch && isSelected && item.isText && !touching {
+        if firstTouch && isSelected && !touching {
             delegate?.stickerItemView(self, didTapSticker: item)
         }
         firstTouch = true
@@ -347,9 +356,9 @@ class EditorStickersItemView: EditorStickersItemBaseView {
             initialScale = pinchScale
             deleteBtn.isHidden = true
             scaleBtn.isHidden = true
-            update(pinchScale: initialScale * pinchGR.scale, isPinch: true, isWindow: true)
+            update(pinchScale: initialScale * pinchGR.scale, isPinch: true, isWindow: false)
         case .changed:
-            update(pinchScale: initialScale * pinchGR.scale, isPinch: true, isWindow: true)
+            update(pinchScale: initialScale * pinchGR.scale, isPinch: true, isWindow: false)
         case .ended, .cancelled, .failed:
             touching = false
             if !item.isAudio {
@@ -391,7 +400,7 @@ class EditorStickersItemView: EditorStickersItemBaseView {
             scaleBtn.isHidden = true
         case .changed:
             radian = initialRadian + rotationGR.rotation
-            update(pinchScale: pinchScale, rotation: radian, isWindow: true)
+            update(pinchScale: pinchScale, rotation: radian, isWindow: false)
         case .ended, .cancelled, .failed:
             if !touching {
                 return

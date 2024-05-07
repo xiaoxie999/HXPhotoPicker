@@ -159,7 +159,16 @@ extension EditorViewController: EditorViewDelegate {
     /// 点击了贴纸
     /// 选中之后再次点击才会触发
     public func editorView(_ editorView: EditorView, didTapStickerItem itemView: EditorStickersItemBaseView) {
-        presentText(itemView.text)
+        switch itemView.item.type {
+        case let .image(image):
+            replaceSticker()
+        case let .imageData(imageData):
+            break
+        case let .text(text):
+            presentText(text)
+        case .audio(_):
+            break
+        }
     }
     
     public func editorView(_ editorView: EditorView, shouldRemoveStickerItem itemView: EditorStickersItemBaseView) {
@@ -244,4 +253,27 @@ extension EditorViewController: EditorViewDelegate {
         }
         return resultImage
     }
+}
+
+extension EditorViewController {
+    
+    func replaceSticker() {
+        let vc = EditorChartletViewController(config: EditorConfiguration.init(), editorType: .video)
+        vc.chartletDelegate = self
+        vc.delegate = self
+        present(vc, animated: true)
+    }
+    
+//    func chartletList(_ chartletList: any EditorChartletListProtocol, didSelectedWith type: EditorChartletType) {
+//        print(type)
+//        switch type {
+//        case .image(let uIImage):
+//            var item = EditorStickerItem(EditorStickerItemType.image(uIImage))
+//            item.frame = CGRect(x: 0, y: 0, width: uIImage.size.width, height: uIImage.size.height)
+//            update(item: item)
+//        case .data(let data):
+//            update(item: EditorStickerItem(EditorStickerItemType.imageData(data)))
+//        }
+//        
+//    }
 }

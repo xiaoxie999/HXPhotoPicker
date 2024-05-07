@@ -557,6 +557,7 @@ extension EditorChartletViewController: UICollectionViewDataSource,
     }
     func listCell(_ cell: EditorChartletViewListCell, didSelectImage image: UIImage, imageData: Data?) {
         if let imageData {
+            /// delegate -> EditorViewController
             delegate?.chartletList(self, didSelectedWith: .data(imageData))
         }else {
             delegate?.chartletList(self, didSelectedWith: .image(image))

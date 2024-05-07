@@ -80,6 +80,12 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
     private var currentItemDegrees: CGFloat = 0
     private var hasImpactFeedback: Bool = false
     
+    var layerView: ChangeLayerView!
+    
+    deinit {
+        print("EditorStickersView delloc: \(self)")
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         initViews()
@@ -91,6 +97,20 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
         trashView.centerX = UIDevice.screenSize.width * 0.5
         trashView.y = UIDevice.screenSize.height
         trashView.alpha = 0
+        
+        let tapGes = UITapGestureRecognizer(target: self, action: #selector(tapAction))
+        tapGes.numberOfTapsRequired = 2
+        tapGes.numberOfTouchesRequired = 2
+        addGestureRecognizer(tapGes)
+        
+        layerView = ChangeLayerView(frame: .zero)
+        //layerView.backgroundColor = .yellow
+        addSubview(layerView)
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layerView.frame = CGRect(x: bounds.size.width - 100, y: 0, width: 100, height: bounds.size.height)
     }
     
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
@@ -102,6 +122,16 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
             return view
         }
         if let view = view, view is EditorStickersContentView {
+            if let itemView = view.superview?.superview as? EditorStickersItemView,
+               !itemView.isDelete {
+                if itemView != selectView {
+                    deselectedSticker()
+                    itemView.isSelected = true
+                    //bringSubviewToFront(itemView)
+                    itemView.resetRotaion()
+                    selectView = itemView
+                }
+            }
             if let selectView = selectView {
                 let rect = selectView.frame
                 if rect.contains(point) {
@@ -115,16 +145,6 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
                 let scaleRect = selectView.convert(selectView.scaleBtn.frame, to: self)
                 if scaleRect.contains(point) {
                     return selectView.scaleBtn
-                }
-            }
-            if let itemView = view.superview?.superview as? EditorStickersItemView,
-               !itemView.isDelete {
-                if itemView != selectView {
-                    deselectedSticker()
-                    itemView.isSelected = true
-                    bringSubviewToFront(itemView)
-                    itemView.resetRotaion()
-                    selectView = itemView
                 }
             }
         }else {
@@ -151,7 +171,7 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
                     if lastView != selectView {
                         deselectedSticker()
                         lastView.isSelected = true
-                        bringSubviewToFront(lastView)
+                        //bringSubviewToFront(lastView)
                         lastView.resetRotaion()
                         selectView = lastView
                     }
@@ -298,6 +318,7 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
             item: item,
             scale: scale
         )
+        //itemView.layer.zPosition = generateZPositon()
         itemView.delegate = self
         var pScale: CGFloat
         if !item.isText && !item.isAudio {
@@ -346,6 +367,9 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
                 self?.deselectedSticker()
             }
         }
+        
+        layerView.refreshList(with: getStickerItem())
+        
         return itemView
     }
     func deselectedSticker() {
@@ -396,9 +420,9 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
         let radians = angle.radians
         currentItemDegrees = radians
         if itemView.superview != UIApplication._keyWindow {
-            let rect = convert(itemView.frame, to: UIApplication._keyWindow)
-            itemView.frame = rect
-            UIApplication._keyWindow?.addSubview(itemView)
+//            let rect = convert(itemView.frame, to: UIApplication._keyWindow)
+//            itemView.frame = rect
+//            UIApplication._keyWindow?.addSubview(itemView)
         }
         let rotation: CGFloat
         if itemView.mirrorScale.x * itemView.mirrorScale.y == 1 {
@@ -417,7 +441,7 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
         itemView.update(
             pinchScale: itemView.pinchScale,
             rotation: rotation,
-            isWindow: true
+            isWindow: false
         )
         currentItemArg = itemView.radian
     }
@@ -599,7 +623,7 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
                     if itemView.frame.contains(cPoint) {
                         itemView.isSelected = true
                         self.selectView = itemView
-                        bringSubviewToFront(itemView)
+                        //bringSubviewToFront(itemView)
                         return
                     }
                 }
@@ -759,5 +783,144 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+extension EditorStickersView {
+    
+    static var initPositon: CGFloat = 0
+    func generateZPositon() -> CGFloat {
+        EditorStickersView.initPositon += 1
+        return EditorStickersView.initPositon
+    }
+    
+    @objc func tapAction() {
+        print(self.subviews)
+        exchangeSubview(at: 0, withSubviewAt: 1)
+        print(self.subviews)
+        insertSubview(subviews[1], at: 0)
+        print(self.subviews)
+    }
+}
+
+public let kScreenWidth: CGFloat = UIScreen.main.bounds.size.width
+public let kScreenHeight: CGFloat = UIScreen.main.bounds.size.height
+
+class ChangeLayerView: UIView {
+    var collectionView : UICollectionView!
+    
+    var itemList: [EditorStickersView.Item.Info] = []
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        buildBaseUI()
+    }
+    
+    func buildBaseUI() {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.itemSize = CGSize(width: 68, height: 86)
+        layout.minimumLineSpacing = 6
+        layout.minimumInteritemSpacing = 0
+        
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "item");
+        collectionView.dataSource = self;
+        collectionView.delegate = self;
+        collectionView.register(LayerItemCell.self, forCellWithReuseIdentifier: "LayerItemCell")
+        collectionView.showsVerticalScrollIndicator = false
+        addSubview(collectionView)
+        
+        let longPressGesture =  UILongPressGestureRecognizer(target: self, action: #selector(handlLongPress(gesture:)))
+        longPressGesture.minimumPressDuration = 0.3
+        collectionView.addGestureRecognizer(longPressGesture)
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        collectionView.frame = CGRect(x: 0, y: 0, width: bounds.size.width, height: bounds.size.height)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func refreshList(with item: EditorStickersView.Item?) {
+        if let item {
+            self.itemList = item.items
+            collectionView.reloadData()
+        }
+    }
+}
+
+extension ChangeLayerView: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        itemList.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(with: LayerItemCell.self, for: indexPath) as! LayerItemCell
+        cell.update(with: itemList[indexPath.row])
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, moveItemAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        
+    }
+    
+    @objc func handlLongPress(gesture: UILongPressGestureRecognizer) {
+        switch gesture.state {
+        case .began:
+            guard let selectedIndexPath = self.collectionView.indexPathForItem(at: gesture.location(in: self.collectionView)) else {
+                break;
+            }
+            collectionView.beginInteractiveMovementForItem(at: selectedIndexPath);
+        case .changed:
+            collectionView.updateInteractiveMovementTargetPosition(gesture.location(in: gesture.view));
+        case .ended:
+            collectionView.endInteractiveMovement()
+        default:
+            collectionView.cancelInteractiveMovement();
+        }
+    }
+}
+
+extension ChangeLayerView {
+    
+    class LayerItemCell: UICollectionViewCell {
+        
+        var imageView: UIImageView!
+        
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+            
+            imageView = UIImageView(frame: .zero)
+            imageView.contentMode = .scaleAspectFit
+            addSubview(imageView)
+        }
+        
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            
+            imageView.frame = CGRect(x: 0, y: 0, width: bounds.size.width, height: bounds.size.height)
+        }
+        
+        func update(with info: EditorStickersView.Item.Info) {
+            switch info.item.type {
+            case .image(let image):
+                imageView.image = image
+            case .imageData(let imageData):
+                break
+            case .text(let text):
+                imageView.image = text.image
+            case .audio(let audio):
+                break
+            }
+        }
+        
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
     }
 }

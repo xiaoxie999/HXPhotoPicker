@@ -47,6 +47,7 @@ class EditorConfigurationViewController: UITableViewController {
                         )!
                     )!
                     let vc = EditorViewController(.init(type: .image(image), result: editedResult), config: config)
+                    vc.modalPresentationStyle = .fullScreen
                     vc.delegate = self
                     present(vc, animated: true, completion: nil)
                 }else {
@@ -56,6 +57,7 @@ class EditorConfigurationViewController: UITableViewController {
                             "https://wx4.sinaimg.cn/large/a6a681ebgy1gojng2qw07g208c093qv6.gif"
                     )!
                     let vc = EditorViewController(.init(type: .networkImage(networkURL), result: editedResult), config: config)
+                    vc.modalPresentationStyle = .fullScreen
                     vc.delegate = self
                     present(vc, animated: true, completion: nil)
                     #else
@@ -73,6 +75,7 @@ class EditorConfigurationViewController: UITableViewController {
             }else {
                 if assetType == 0 {
                     let vc = EditorViewController(.init(type: .video(videoURL), result: editedResult), config: config)
+                    vc.modalPresentationStyle = .fullScreen
                     vc.delegate = self
                     present(vc, animated: true, completion: nil)
                 }else {
@@ -81,6 +84,7 @@ class EditorConfigurationViewController: UITableViewController {
                             "http://tsnrhapp.oss-cn-hangzhou.aliyuncs.com/picker_examle_video.mp4"
                     )!
                     let vc = EditorViewController(.init(type: .networkVideo(networkURL), result: editedResult), config: config)
+                    vc.modalPresentationStyle = .fullScreen
                     vc.delegate = self
                     present(vc, animated: true, completion: nil)
                 }

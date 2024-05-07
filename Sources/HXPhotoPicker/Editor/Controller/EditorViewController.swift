@@ -315,6 +315,8 @@ open class EditorViewController: HXBaseViewController {
         scaleSwitchView.addSubview(scaleSwitchRightBtn)
         
         editorView = EditorView()
+        editorView.layer.borderColor = UIColor.red.cgColor
+        editorView.layer.borderWidth = 2
         if #available(iOS 13.0, *) {
             backgroundView = UIScrollView()
             backgroundView.maximumZoomScale = 1

@@ -133,6 +133,8 @@ class EditorAdjusterView: UIView {
     var frameView: EditorFrameView!
     
     private func initViews() {
+        layer.borderColor = UIColor.yellow.cgColor
+        layer.borderWidth = 2
         rotateView = UIView()
         rotateView.isUserInteractionEnabled = false
         
