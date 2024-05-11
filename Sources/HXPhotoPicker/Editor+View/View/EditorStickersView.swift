@@ -104,8 +104,16 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
         addGestureRecognizer(tapGes)
         
         layerView = ChangeLayerView(frame: .zero)
-        //layerView.backgroundColor = .yellow
-        addSubview(layerView)
+        layerView.backgroundColor = .lightGray.withAlphaComponent(0.5)
+        layerView.exchangeBlock = { [weak self] from, to in
+            if let view = self?.subviews[from] {
+                self?.insertSubview(view, at: to)
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self else { return }
+            superview?.addSubview(layerView)
+        }
     }
     
     override func layoutSubviews() {
@@ -690,6 +698,9 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
             } completion: { _ in
                 itemView.removeFromSuperview()
                 self.delegate?.stickerView(self, didRemoveItem: itemView)
+                
+                /// 刷新(删除item)
+                self.layerView.refreshList(with: self.getStickerItem())
             }
             selectView = nil
             delegate?.stickerView(self, shouldRemoveItem: itemView)
@@ -740,6 +751,9 @@ class EditorStickersView: UIView, EditorStickersItemViewDelegate {
         delegate?.stickerView(self, shouldRemoveItem: itemView)
         itemView.removeFromSuperview()
         delegate?.stickerView(self, didRemoveItem: itemView)
+        
+        /// 刷新(删除item)
+        self.layerView.refreshList(with: self.getStickerItem())
     }
     
     struct Item: Codable {
@@ -808,6 +822,8 @@ public let kScreenHeight: CGFloat = UIScreen.main.bounds.size.height
 
 class ChangeLayerView: UIView {
     var collectionView : UICollectionView!
+    var exchangeBlock: ((Int, Int) -> Void)?
+    var refreshBtn: UIButton!
     
     var itemList: [EditorStickersView.Item.Info] = []
     
@@ -835,11 +851,18 @@ class ChangeLayerView: UIView {
         let longPressGesture =  UILongPressGestureRecognizer(target: self, action: #selector(handlLongPress(gesture:)))
         longPressGesture.minimumPressDuration = 0.3
         collectionView.addGestureRecognizer(longPressGesture)
+        
+        refreshBtn = UIButton(frame: .zero)
+        refreshBtn.setTitle("刷新", for: .normal)
+        refreshBtn.setTitleColor(.systemBlue, for: .normal)
+        refreshBtn.addTarget(self, action: #selector(refreshAction), for: .touchUpInside)
+        addSubview(refreshBtn)
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         collectionView.frame = CGRect(x: 0, y: 0, width: bounds.size.width, height: bounds.size.height)
+        refreshBtn.frame = CGRect(x: 0, y: bounds.size.height - 100, width: 50, height: 45)
     }
     
     required init?(coder: NSCoder) {
@@ -848,9 +871,13 @@ class ChangeLayerView: UIView {
     
     func refreshList(with item: EditorStickersView.Item?) {
         if let item {
-            self.itemList = item.items
+            self.itemList = item.items.reversed()
             collectionView.reloadData()
         }
+    }
+    
+    @objc func refreshAction() {
+        collectionView.reloadData()
     }
 }
 
@@ -866,7 +893,11 @@ extension ChangeLayerView: UICollectionViewDelegateFlowLayout, UICollectionViewD
     }
     
     func collectionView(_ collectionView: UICollectionView, moveItemAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-        
+        let num = itemList.count - 1
+        if num > 0 {
+            itemList.swapAt(num - sourceIndexPath.row, num - destinationIndexPath.row)
+            exchangeBlock?(num - sourceIndexPath.row, num - destinationIndexPath.row)
+        }
     }
     
     @objc func handlLongPress(gesture: UILongPressGestureRecognizer) {
